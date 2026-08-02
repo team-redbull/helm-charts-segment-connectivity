@@ -20,6 +20,16 @@ spec:
     metadata:
       labels:
         app: segment-connectivity
+      annotations:
+        # Roll the workers whenever this chart's ConfigMap content changes.
+        # Its values (PORTS_*, BMC_SEGMENTS_BY_SITE, the NEXT_* endpoints) are
+        # read ONCE at startup into SegmentConnectivityActivitySettings — and
+        # envFrom values are injected at pod creation — so without this a
+        # config change syncs in Argo, reports Healthy, and changes NOTHING
+        # until someone happens to restart the pods. That silently cost a run:
+        # a corrected BMC_SEGMENTS_BY_SITE was live in the ConfigMap while the
+        # workers kept failing on the old value.
+        checksum/config: {{ include (print $.Template.BasePath "/config.yaml") . | sha256sum }}
     spec:
       serviceAccountName: segment-connectivity
       containers:
