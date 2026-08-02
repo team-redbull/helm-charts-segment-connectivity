@@ -28,10 +28,10 @@ spec:
           imagePullPolicy: {{ .Values.activityWorker.image.pullPolicy }}
           envFrom:
             # Global config (Temporal + DOMAIN + SEGMENTS_MANAGER_URL), owned by
-            # the workflows chart — install that release first, or this
+            # the workflows-orchestrator chart — install that release first, or this
             # pod stalls in CreateContainerConfigError on the missing ConfigMap.
             - configMapRef:
-                name: workflows-config
+                name: workflows-orchestrator-config
             # Segment-connectivity-specific endpoints + port policy, owned by this chart.
             - configMapRef:
                 name: segment-connectivity-config
