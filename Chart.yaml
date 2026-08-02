@@ -2,5 +2,5 @@ apiVersion: v2
 name: segment-connectivity
 description: Segment-connectivity activity worker — opens firewall rules via the next service and unlocks segments in the Segments Manager. Deploys alongside the shared workflows-orchestrator chart, which runs the workflow brain.
 type: application
-version: 0.1.0
-appVersion: "0.1.0"
+version: 0.1.2
+appVersion: "v0.1.2"
