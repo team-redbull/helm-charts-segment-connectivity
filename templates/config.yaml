@@ -32,8 +32,18 @@ data:
   # -- BMC: every MCE segment also opens a one-directional rule to its
   # site's static BMC network (not tracked by the Segments Manager, so it
   # is a static site -> CIDR mapping here instead of a Segments Manager
-  # query). Placeholder values below — set every real site before deploying.
-  BMC_SEGMENTS_BY_SITE: '{"site-a": "10.50.0.0/16"}'
+  # query).
+  #
+  # Keys MUST be the Segments Manager's configured site names (its
+  # SITE_PREFIXES keys — site1/site2/site3 here). A site missing from this map
+  # fails every MCE segment in it with BmcSegmentNotConfiguredError, which is
+  # non-retryable by design: it is a config gap, not an outage. The previous
+  # value was the "site-a" placeholder, which matched no real site.
+  #
+  # These are the BMC management networks, deliberately outside the sites' own
+  # SITE_PREFIXES ranges (192./193./194.) — BMC is a separate network, not a
+  # segment the Segments Manager allocates from.
+  BMC_SEGMENTS_BY_SITE: '{"site1": "10.50.0.0/16", "site2": "10.51.0.0/16", "site3": "10.52.0.0/16"}'
   PORTS_MCE_TO_BMC: '{"tcp": ["623"], "udp": ["623"]}'
 {{- if not .Values.secrets.existingSecret }}
 ---
