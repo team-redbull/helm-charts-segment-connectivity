@@ -43,6 +43,10 @@ config:
   nextTokenRenewalUri: "/token-renewal-uri"
   nextOpenRulesUri: "/open-rules-uri"
   nextCheckStatusUri: "/check-request-status"
+  # The AD group next attributes every open-rules request to. A group in next's
+  # own directory — this placeholder suits the local mock (which accepts any
+  # string); real environments must override it via redbull-platform's values.
+  nextGroup: "dev-group"
   # Seconds between polls of a submitted next request's status. 15s here for
   # immediate feedback against the local mock; prod (real human-driven
   # approval) should override to 600 (10 min) via redbull-platform's values.

@@ -13,6 +13,10 @@ data:
   NEXT_TOKEN_RENEWAL_URI: {{ .Values.config.nextTokenRenewalUri | quote }}
   NEXT_OPEN_RULES_URI: {{ .Values.config.nextOpenRulesUri | quote }}
   NEXT_CHECK_STATUS_URI: {{ .Values.config.nextCheckStatusUri | quote }}
+  # The AD group next attributes every open-rules request to (payload
+  # `ad_groups`). A group in next's own directory, so it differs per
+  # environment — override via redbull-platform's per-environment values.
+  NEXT_GROUP: {{ .Values.config.nextGroup | quote }}
   # Seconds between polls of a submitted next request's status. Fast locally
   # (immediate feedback against the mock), slow in prod (human-driven
   # approval) — override via redbull-platform's per-environment values.
