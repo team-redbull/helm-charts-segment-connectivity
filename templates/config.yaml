@@ -29,21 +29,40 @@ data:
   PORTS_MCE_TO_INVENTORY: '{"tcp": ["6443", "30000-32767"]}'
   PORTS_PXE_TO_MCE: '{"tcp": ["30000-32767"], "udp": ["9000"]}'
   PORTS_MCE_TO_PXE: '{"tcp": ["6443", "30000-32767"]}'
-  # -- BMC: every MCE segment also opens a one-directional rule to its
-  # site's static BMC network (not tracked by the Segments Manager, so it
-  # is a static site -> CIDR mapping here instead of a Segments Manager
-  # query).
+  # -- Site topology: site name -> {pool, bmc} ------------------------------
+  # Defined ONCE in redbull-platform (gitops/values/<env>.yaml, key
+  # `siteNetworks`) and rendered from that same value into BOTH this ConfigMap
+  # and the Segments Manager's. The two services being keyed by the identical
+  # site list is now structural — it used to be enforced only by this comment,
+  # which is why a "site-a" placeholder once matched no real site.
   #
-  # Keys MUST be the Segments Manager's configured site names (its
-  # SITE_PREFIXES keys — site1/site2/site3 here). A site missing from this map
-  # fails every MCE segment in it with BmcSegmentNotConfiguredError, which is
-  # non-retryable by design: it is a config gap, not an outage. The previous
-  # value was the "site-a" placeholder, which matched no real site.
+  # This worker reads only `bmc`: every MCE segment opens a one-directional rule
+  # to its site's static BMC network, which the Segments Manager does not track.
+  # `pool` is the Segments Manager's (the range its segments must fall inside)
+  # and is ignored here — SiteNetworks sets extra="ignore" so neither service
+  # breaks when the other's sub-keys change.
   #
-  # These are the BMC management networks, deliberately outside the sites' own
-  # SITE_PREFIXES ranges (192./193./194.) — BMC is a separate network, not a
-  # segment the Segments Manager allocates from.
-  BMC_SEGMENTS_BY_SITE: '{"site1": "10.50.0.0/16", "site2": "10.51.0.0/16", "site3": "10.52.0.0/16"}'
+  # A site missing from this map fails every MCE segment in it with
+  # BmcSegmentNotConfiguredError, non-retryable by design: a config gap, not an
+  # outage. BMC networks sit deliberately outside every site's `pool` — BMC is a
+  # separate network, not something the Segments Manager allocates from.
+  #
+  # `fail` rather than sprig `required`: required only rejects nil/"", so an
+  # empty map would render as the string "{}" and only fail at pod startup.
+{{- if not .Values.siteNetworks }}
+{{- fail "siteNetworks is empty. Define it once in redbull-platform (gitops/values/<env>.yaml, key `siteNetworks`); the ApplicationSet merges that file in ahead of this chart's values." }}
+{{- end }}
+  SITE_NETWORKS: {{ .Values.siteNetworks | toJson | quote }}
+  # TRANSITIONAL (remove once every activity-worker replica runs an image that
+  # reads SITE_NETWORKS). The running image still REQUIRES BMC_SEGMENTS_BY_SITE
+  # and would crash-loop without it, so this ConfigMap has to carry BOTH keys
+  # while the image rolls. Projected from siteNetworks rather than hardcoded, so
+  # the old key and the new one cannot disagree during the window.
+{{- $bmcBySite := dict }}
+{{- range $site, $networks := .Values.siteNetworks }}
+{{- $_ := set $bmcBySite $site $networks.bmc }}
+{{- end }}
+  BMC_SEGMENTS_BY_SITE: {{ $bmcBySite | toJson | quote }}
   PORTS_MCE_TO_BMC: '{"tcp": ["623"], "udp": ["623"]}'
 {{- if not .Values.secrets.existingSecret }}
 ---

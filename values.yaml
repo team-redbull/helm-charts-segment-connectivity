@@ -18,6 +18,22 @@
 # namespace (redbull-workflows) is pre-created by its own `namespaces` release;
 # standalone, pass `--create-namespace` to `helm install`.
 
+# Site network topology — site name -> {pool, bmc}. The one exception to the
+# PORTS_* rule above, and for a specific reason: unlike ports, this is SHARED
+# with another chart. helm-charts-segments-manager renders the same value into
+# its own ConfigMap, so redbull-platform has to be able to set it once for both.
+# Ports are this chart's alone; site topology is not.
+#
+# This worker reads only `bmc`; `pool` is the Segments Manager's.
+#
+# Deliberately EMPTY, and it must stay that way. The value is defined once in
+# redbull-platform (gitops/values/<env>.yaml, key `siteNetworks`), which the
+# ApplicationSet merges in ahead of this file. Helm DEEP-MERGES maps: a
+# non-empty default here would NOT be replaced by the environment's value, it
+# would merge with it, silently leaking a stale site into every environment.
+# Empty + the fail guard in templates/config.yaml is the only safe shape.
+siteNetworks: {}
+
 config:
   # The next (connectivity/firewall) service. In dev this points at
   # dev/mock-segment-connectivity running OUTSIDE the chart; in air-gapped prod, at the
