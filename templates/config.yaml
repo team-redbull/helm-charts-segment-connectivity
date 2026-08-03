@@ -53,16 +53,6 @@ data:
 {{- fail "siteNetworks is empty. Define it once in redbull-platform (gitops/values/<env>.yaml, key `siteNetworks`); the ApplicationSet merges that file in ahead of this chart's values." }}
 {{- end }}
   SITE_NETWORKS: {{ .Values.siteNetworks | toJson | quote }}
-  # TRANSITIONAL (remove once every activity-worker replica runs an image that
-  # reads SITE_NETWORKS). The running image still REQUIRES BMC_SEGMENTS_BY_SITE
-  # and would crash-loop without it, so this ConfigMap has to carry BOTH keys
-  # while the image rolls. Projected from siteNetworks rather than hardcoded, so
-  # the old key and the new one cannot disagree during the window.
-{{- $bmcBySite := dict }}
-{{- range $site, $networks := .Values.siteNetworks }}
-{{- $_ := set $bmcBySite $site $networks.bmc }}
-{{- end }}
-  BMC_SEGMENTS_BY_SITE: {{ $bmcBySite | toJson | quote }}
   PORTS_MCE_TO_BMC: '{"tcp": ["623"], "udp": ["623"]}'
 {{- if not .Values.secrets.existingSecret }}
 ---
