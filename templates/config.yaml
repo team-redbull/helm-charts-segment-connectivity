@@ -1,4 +1,7 @@
-# segment-lifecycle-config: the per-workflow ConfigMap for the segment-lifecycle domain.
+# segment-lifecycle-config: the per-DOMAIN ConfigMap for the segment-lifecycle domain.
+# Per-domain, not per-workflow: one activity-worker deployment serves every workflow
+# in the domain and consumes this via envFrom, so there is nothing a per-workflow
+# ConfigMap could attach to (see the code repo's CLAUDE.md section 2).
 # Holds ONLY segment-lifecycle-specific endpoints + policy. Values shared across all
 # domains (Temporal, DOMAIN, SEGMENTS_MANAGER_URL) live in the global
 # `workflows-orchestrator-config` owned by the workflows-orchestrator chart, which the activity
