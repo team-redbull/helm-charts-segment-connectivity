@@ -1,25 +1,30 @@
-# The segment-lifecycle activity "limb": its own deployment, ServiceAccount and
-# Segments Manager token. Heavy/domain deps and secrets live here, not in the brain.
+# The segment-lifecycle domain's activity worker "limb": its own deployment,
+# ServiceAccount and Segments Manager token. Heavy/domain deps and secrets live
+# here, not in the brain.
+#
+# The -worker suffix names the PROCESS. Everything domain-scoped below keeps the
+# bare name (segment-lifecycle-config, the segment-lifecycle-activity queue this
+# polls) because a second workflow in the domain shares them with this same pod.
 apiVersion: v1
 kind: ServiceAccount
 metadata:
-  name: segment-lifecycle
+  name: segment-lifecycle-worker
 ---
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: segment-lifecycle
+  name: segment-lifecycle-worker
   labels:
-    app: segment-lifecycle
+    app: segment-lifecycle-worker
 spec:
   replicas: {{ .Values.activityWorker.replicas }}
   selector:
     matchLabels:
-      app: segment-lifecycle
+      app: segment-lifecycle-worker
   template:
     metadata:
       labels:
-        app: segment-lifecycle
+        app: segment-lifecycle-worker
       annotations:
         # Roll the workers whenever this chart's ConfigMap content changes.
         # Its values (PORTS_*, SITE_NETWORKS, the NEXT_* endpoints) are
@@ -31,9 +36,9 @@ spec:
         # workers kept failing on the old value.
         checksum/config: {{ include (print $.Template.BasePath "/config.yaml") . | sha256sum }}
     spec:
-      serviceAccountName: segment-lifecycle
+      serviceAccountName: segment-lifecycle-worker
       containers:
-        - name: segment-lifecycle
+        - name: segment-lifecycle-worker
           image: "{{ .Values.activityWorker.image.repository }}:{{ .Values.activityWorker.image.tag }}"
           imagePullPolicy: {{ .Values.activityWorker.image.pullPolicy }}
           envFrom:

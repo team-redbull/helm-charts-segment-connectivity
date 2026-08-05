@@ -5,7 +5,7 @@
 #
 # NOTE: the per-direction port policy (PORTS_*) deliberately does NOT live here.
 # It is defined directly in templates/config.yaml — the ConfigMap is the
-# operator's edit surface for ports (edit + restart activity workers, no
+# operator's edit surface for ports (edit + restart the activity workers, no
 # rebuild, no chart re-render).
 #
 # The GLOBAL values (Temporal connection, DOMAIN, segmentsManagerUrl) are NOT
@@ -65,7 +65,7 @@ secrets:
   segmentsManagerApiToken: "dev-token"
 activityWorker:
   image:
-    repository: ghcr.io/team-redbull/segment-lifecycle
+    repository: ghcr.io/team-redbull/segment-lifecycle-worker
     tag: v0.1.8
     pullPolicy: IfNotPresent
   replicas: 2
