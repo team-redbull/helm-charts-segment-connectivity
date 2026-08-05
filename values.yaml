@@ -65,7 +65,7 @@ secrets:
   segmentsManagerApiToken: "dev-token"
 activityWorker:
   image:
-    repository: ghcr.io/team-redbull/segment-connectivity
+    repository: ghcr.io/team-redbull/segment-lifecycle
     tag: v0.1.7
     pullPolicy: IfNotPresent
   replicas: 2

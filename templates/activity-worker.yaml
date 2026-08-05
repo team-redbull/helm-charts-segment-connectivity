@@ -1,29 +1,29 @@
-# The segment-connectivity activity "limb": its own deployment, ServiceAccount and
+# The segment-lifecycle activity "limb": its own deployment, ServiceAccount and
 # Segments Manager token. Heavy/domain deps and secrets live here, not in the brain.
 apiVersion: v1
 kind: ServiceAccount
 metadata:
-  name: segment-connectivity
+  name: segment-lifecycle
 ---
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: segment-connectivity
+  name: segment-lifecycle
   labels:
-    app: segment-connectivity
+    app: segment-lifecycle
 spec:
   replicas: {{ .Values.activityWorker.replicas }}
   selector:
     matchLabels:
-      app: segment-connectivity
+      app: segment-lifecycle
   template:
     metadata:
       labels:
-        app: segment-connectivity
+        app: segment-lifecycle
       annotations:
         # Roll the workers whenever this chart's ConfigMap content changes.
         # Its values (PORTS_*, SITE_NETWORKS, the NEXT_* endpoints) are
-        # read ONCE at startup into SegmentConnectivityActivitySettings — and
+        # read ONCE at startup into SegmentLifecycleActivitySettings — and
         # envFrom values are injected at pod creation — so without this a
         # config change syncs in Argo, reports Healthy, and changes NOTHING
         # until someone happens to restart the pods. That silently cost a run:
@@ -31,9 +31,9 @@ spec:
         # workers kept failing on the old value.
         checksum/config: {{ include (print $.Template.BasePath "/config.yaml") . | sha256sum }}
     spec:
-      serviceAccountName: segment-connectivity
+      serviceAccountName: segment-lifecycle
       containers:
-        - name: segment-connectivity
+        - name: segment-lifecycle
           image: "{{ .Values.activityWorker.image.repository }}:{{ .Values.activityWorker.image.tag }}"
           imagePullPolicy: {{ .Values.activityWorker.image.pullPolicy }}
           envFrom:
@@ -42,8 +42,8 @@ spec:
             # pod stalls in CreateContainerConfigError on the missing ConfigMap.
             - configMapRef:
                 name: workflows-orchestrator-config
-            # Segment-connectivity-specific endpoints + port policy, owned by this chart.
+            # Segment-lifecycle-specific endpoints + port policy, owned by this chart.
             - configMapRef:
-                name: segment-connectivity-config
+                name: segment-lifecycle-config
             - secretRef:
                 name: {{ .Values.secrets.existingSecret | default "segments-manager-token" }}

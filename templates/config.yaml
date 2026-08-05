@@ -1,13 +1,13 @@
-# segment-connectivity-config: the per-workflow ConfigMap for the segment-connectivity domain.
-# Holds ONLY segment-connectivity-specific endpoints + policy. Values shared across all
+# segment-lifecycle-config: the per-workflow ConfigMap for the segment-lifecycle domain.
+# Holds ONLY segment-lifecycle-specific endpoints + policy. Values shared across all
 # domains (Temporal, DOMAIN, SEGMENTS_MANAGER_URL) live in the global
 # `workflows-orchestrator-config` owned by the workflows-orchestrator chart, which the activity
-# worker also mounts. Every key equals a SegmentConnectivityActivitySettings field
+# worker also mounts. Every key equals a SegmentLifecycleActivitySettings field
 # (uppercased) — keep shared/settings.py and this file aligned.
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: segment-connectivity-config
+  name: segment-lifecycle-config
 data:
   NEXT_URL: {{ .Values.config.nextUrl | quote }}
   NEXT_TOKEN_RENEWAL_URI: {{ .Values.config.nextTokenRenewalUri | quote }}
