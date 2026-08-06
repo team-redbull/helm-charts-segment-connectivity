@@ -66,6 +66,6 @@ secrets:
 activityWorker:
   image:
     repository: ghcr.io/team-redbull/segment-lifecycle-worker
-    tag: v0.1.10
+    tag: v0.1.11
     pullPolicy: IfNotPresent
   replicas: 2
